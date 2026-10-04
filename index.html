@@ -272,7 +272,7 @@ function viewEmpty(){
     <h2>${label(S.cur)} todavía no empieza</h2>
     <p>${prev?`Copio tus gastos fijos, inversiones y Livret A de ${label(prev).toLowerCase()}. Tú solo pones el ingreso y lo que cambie.`:'Empieza tu primer mes: luego añades tus gastos fijos e inversiones.'}</p>
     <button class="btn" data-act="start">Empezar ${label(S.cur).toLowerCase()}</button>
-    ${sortedKeys().length?'':`<p class="hint" style="margin-top:14px">¿Tienes una copia de seguridad?</p>${restoreBtn('ghost')}`}
+    ${sortedKeys().length?'':`<p class="hint" style="margin-top:14px">¿Tienes una copia de seguridad? Ve a la pestaña Historial para restaurarla.</p>`}
     ${last&&last!==S.cur?`<p style="margin-top:14px"><button class="btn ghost" data-act="goto" data-m="${last}">Ver ${label(last).toLowerCase()}</button></p>`:''}
   </section>`;
 }
@@ -454,7 +454,13 @@ function backupHTML(){
     <div style="display:grid;gap:8px;margin-top:10px">
       ${has?`<button class="btn solid" data-act="export" data-scope="mes">Copia de ${label(S.cur).toLowerCase()}</button>`:''}
       <button class="btn solid" data-act="export" data-scope="todo">Copia completa (todos los meses)</button>
+      <button class="btn solid" data-act="copy">Copiar copia completa (texto)</button>
       ${restoreBtn()}
+      <button class="btn solid" data-act="paste">Pegar copia (texto)</button>
+    </div>
+    <div id="pastebox" hidden style="margin-top:10px">
+      <textarea id="pastetxt" rows="5" placeholder="Pega aquí el texto de tu copia" style="font:inherit;width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;background:var(--bg);color:var(--ink)"></textarea>
+      <button class="btn" style="margin-top:8px" data-act="pasteok">Restaurar desde el texto</button>
     </div>
     <p class="hint">Para restaurar puedes elegir la copia completa o uno o varios archivos de mes. La app se pone al día y te lleva al último mes.</p>
   </section>`;
@@ -511,6 +517,9 @@ view.addEventListener('click',e=>{
   if(a==='start')return startMonth(S.cur);
   if(a==='goto'){S.cur=b.dataset.m;if(S.tab==='hist')S.tab='mes';render();window.scrollTo(0,0);return}
   if(a==='export')return exportData(b.dataset.scope);
+  if(a==='copy')return copyAll();
+  if(a==='paste'){const p=document.getElementById('pastebox');p.hidden=!p.hidden;if(!p.hidden)document.getElementById('pastetxt').focus();return}
+  if(a==='pasteok')return restoreText(document.getElementById('pastetxt').value);
   if(a==='refill'){refill(S.cur);render();setStatus('Copiado ✓');return}
   if(!M)return;
   if(a==='addfijo'||a==='addimp'){
@@ -529,6 +538,12 @@ view.addEventListener('click',e=>{
 
 function resumen(keys){return keys.map(k=>{const c=calc(S.months[k]);const r=x=>Math.round(x*100)/100;
   return{mes:k,ingreso:r(c.ingreso),caf:r(z(S.months[k].caf)),gastosFijos:r(c.fijosSolo),imprevistos:r(c.imprev),dineroLibre:r(c.libre),coachingBruto:r(c.coaching),livretA:r(c.livret),patrimonio:r(c.total)}})}
+async function copyAll(){
+  const keys=sortedKeys();const months={};keys.forEach(k=>months[k]=S.months[k]);
+  const txt=JSON.stringify({app:'mesura',version:2,tipo:'completa',exportado:new Date().toISOString(),months});
+  try{await navigator.clipboard.writeText(txt);setStatus('Copia copiada ✓ — pégala en una nota o envíatela por mensaje')}
+  catch(e){const p=document.getElementById('pastebox');p.hidden=false;const ta=document.getElementById('pastetxt');ta.value=txt;ta.select();setStatus('Selecciona el texto del recuadro y cópialo')}
+}
 async function exportData(scope){
   const keys=scope==='mes'?[S.cur]:sortedKeys();
   const months={};keys.forEach(k=>months[k]=S.months[k]);
@@ -544,9 +559,14 @@ async function exportData(scope){
 }
 async function importFiles(list){
   const files=[...(list||[])];if(!files.length)return;
+  const texts=[];for(const f of files){try{texts.push(await f.text())}catch(e){}}
+  restoreTexts(texts);
+}
+function restoreText(t){restoreTexts([t])}
+function restoreTexts(texts){
   const found={};
-  for(const f of files){
-    try{const d=JSON.parse(await f.text());const ms=d.months||d;
+  for(const t of texts){
+    try{const s=String(t).trim();const d=JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1));const ms=d.months||d;
       Object.keys(ms).forEach(k=>{if(/^\d{4}-\d{2}$/.test(k)&&ms[k]&&typeof ms[k]==='object')found[k]=ms[k]})}
     catch(e){}
   }
