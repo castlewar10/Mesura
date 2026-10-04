@@ -1,0 +1,271 @@
+{
+  "app": "mesura",
+  "version": 1,
+  "exportado": "2026-10-04T08:00:00.000Z",
+  "months": {
+    "2026-08": {
+      "mes": "2026-08",
+      "ingreso": 1247.94,
+      "caf": null,
+      "reglas": {
+        "fijos": 60,
+        "ahorro": 25,
+        "ocio": 15
+      },
+      "fijos": [
+        {
+          "id": "f0",
+          "nombre": "Alquiler",
+          "monto": 443.06,
+          "pagado": true,
+          "tr": false,
+          "nota": "443,06 € desde el 1 ago 2026, cada día 3"
+        },
+        {
+          "id": "f1",
+          "nombre": "Luz e internet casa",
+          "monto": 52.0,
+          "pagado": true,
+          "tr": false,
+          "nota": "día 3"
+        },
+        {
+          "id": "f2",
+          "nombre": "Celular línea personal",
+          "monto": 5.0,
+          "pagado": true,
+          "tr": false,
+          "nota": "día 12"
+        },
+        {
+          "id": "f3",
+          "nombre": "Seguro médico Tango",
+          "monto": 38.72,
+          "pagado": true,
+          "tr": true,
+          "nota": "día 5"
+        },
+        {
+          "id": "f4",
+          "nombre": "Comida casa",
+          "monto": 75.0,
+          "pagado": false,
+          "tr": true,
+          "nota": "≈25 € por semana (variable)"
+        },
+        {
+          "id": "f5",
+          "nombre": "Spotify / Spliit",
+          "monto": 5.0,
+          "pagado": true,
+          "tr": true,
+          "nota": "día 4"
+        },
+        {
+          "id": "f6",
+          "nombre": "Mantenimiento bicicleta",
+          "monto": 0.0,
+          "pagado": false,
+          "tr": true,
+          "nota": "Irregular — sin gasto desde invierno"
+        },
+        {
+          "id": "f7",
+          "nombre": "Claude (suscripción)",
+          "monto": 21.6,
+          "pagado": true,
+          "tr": true,
+          "nota": "día 7"
+        }
+      ],
+      "anuales": [
+        {
+          "id": "a1",
+          "nombre": "Comida Tango",
+          "monto": 40.97,
+          "frecuencia": "Cada 3 meses",
+          "nota": "2 sacos 3 kg OWNAT + envío"
+        },
+        {
+          "id": "a2",
+          "nombre": "Amazon Prime",
+          "monto": 69.9,
+          "frecuencia": "Anual",
+          "nota": "Próximo pago 24 feb 2027"
+        },
+        {
+          "id": "a3",
+          "nombre": "Seguro habitation",
+          "monto": 151.87,
+          "frecuencia": "Anual",
+          "nota": "Próximo pago 26 ene 2027"
+        }
+      ],
+      "gastos": [],
+      "inv": [],
+      "livret": {
+        "saldo": 7000.0,
+        "meta": 7150.0,
+        "tasa": 0.017
+      },
+      "actualizado": "2026-10-04T08:00:00.000Z"
+    },
+    "2026-09": {
+      "mes": "2026-09",
+      "ingreso": 1278.26,
+      "caf": 222.61,
+      "reglas": {
+        "fijos": 60,
+        "ahorro": 25,
+        "ocio": 15
+      },
+      "fijos": [
+        {
+          "id": "f0",
+          "nombre": "Alquiler",
+          "monto": 443.06,
+          "pagado": true,
+          "tr": false,
+          "nota": "443,06 € desde el 1 ago 2026, cada día 3"
+        },
+        {
+          "id": "f1",
+          "nombre": "Luz e internet casa",
+          "monto": 52.0,
+          "pagado": true,
+          "tr": false,
+          "nota": "día 3"
+        },
+        {
+          "id": "f2",
+          "nombre": "Celular línea personal",
+          "monto": 5.0,
+          "pagado": true,
+          "tr": false,
+          "nota": "día 12"
+        },
+        {
+          "id": "f3",
+          "nombre": "Seguro médico Tango",
+          "monto": 38.72,
+          "pagado": true,
+          "tr": true,
+          "nota": "día 5"
+        },
+        {
+          "id": "f4",
+          "nombre": "Comida casa",
+          "monto": 75.0,
+          "pagado": false,
+          "tr": true,
+          "nota": "≈25 € por semana (variable)"
+        },
+        {
+          "id": "f5",
+          "nombre": "Spotify / Spliit",
+          "monto": 5.0,
+          "pagado": true,
+          "tr": true,
+          "nota": "día 4"
+        },
+        {
+          "id": "f6",
+          "nombre": "Mantenimiento bicicleta",
+          "monto": 0.0,
+          "pagado": false,
+          "tr": true,
+          "nota": "Irregular — sin gasto desde invierno"
+        },
+        {
+          "id": "f7",
+          "nombre": "Claude (suscripción)",
+          "monto": 21.6,
+          "pagado": true,
+          "tr": true,
+          "nota": "día 7"
+        }
+      ],
+      "anuales": [
+        {
+          "id": "a1",
+          "nombre": "Comida Tango",
+          "monto": 40.97,
+          "frecuencia": "Cada 3 meses",
+          "nota": "2 sacos 3 kg OWNAT + envío"
+        },
+        {
+          "id": "a2",
+          "nombre": "Amazon Prime",
+          "monto": 69.9,
+          "frecuencia": "Anual",
+          "nota": "Próximo pago 24 feb 2027"
+        },
+        {
+          "id": "a3",
+          "nombre": "Seguro habitation",
+          "monto": 151.87,
+          "frecuencia": "Anual",
+          "nota": "Próximo pago 26 ene 2027"
+        }
+      ],
+      "gastos": [],
+      "inv": [
+        {
+          "id": "i1",
+          "nombre": "Cuenta Madre TR (efectivo)",
+          "plataforma": "Trade Republic",
+          "monto": 650.0,
+          "aporte": null,
+          "tipo": "financiero"
+        },
+        {
+          "id": "i2",
+          "nombre": "ETF Stoxx 600 Europa",
+          "plataforma": "Trade Republic · PEA",
+          "monto": 43.07,
+          "aporte": 25,
+          "tipo": "financiero"
+        },
+        {
+          "id": "i3",
+          "nombre": "ETF S&P 500",
+          "plataforma": "Trade Republic · PEA",
+          "monto": 134.51,
+          "aporte": 55,
+          "tipo": "financiero"
+        },
+        {
+          "id": "i4",
+          "nombre": "MSCI Emerging Markets",
+          "plataforma": "Trade Republic · PEA",
+          "monto": 35.5,
+          "aporte": 60,
+          "cadaMeses": 3,
+          "tipo": "financiero"
+        },
+        {
+          "id": "i5",
+          "nombre": "Assurance-vie · Fonds euros",
+          "plataforma": "Linxea",
+          "monto": 500.0,
+          "aporte": 100,
+          "tipo": "financiero"
+        },
+        {
+          "id": "i6",
+          "nombre": "Propiedad",
+          "plataforma": "Terreno",
+          "monto": 25773.64,
+          "aporte": null,
+          "tipo": "fisico"
+        }
+      ],
+      "livret": {
+        "saldo": 7000.0,
+        "meta": 7150.0,
+        "tasa": 0.017
+      },
+      "actualizado": "2026-10-04T08:00:00.000Z"
+    }
+  }
+}
