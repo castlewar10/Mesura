@@ -242,6 +242,18 @@ function startMonth(m){
   save(m);render();
 }
 
+function isEmptyMonth(M){return !(M.fijos||[]).length&&!(M.inv||[]).length}
+function refill(m){
+  const M=S.months[m];const prev=sortedKeys().filter(k=>k<m&&!isEmptyMonth(S.months[k])).pop();
+  if(!M||!prev)return false;const P=S.months[prev];
+  if(!(M.fijos||[]).length)M.fijos=P.fijos.map(f=>({...f,pagado:false}));
+  if(!(M.anuales||[]).length)M.anuales=(P.anuales||[]).map(a=>({...a}));
+  if(!(M.inv||[]).length)M.inv=P.inv.map(i=>({...i,revisado:false}));
+  if(!M.livret||M.livret.saldo==null)M.livret={...P.livret};
+  if(M.caf==null)M.caf=P.caf;
+  save(m);return true;
+}
+
 /* ---------- vistas ---------- */
 function render(){
   document.getElementById('mtitle').textContent=label(S.cur);
@@ -332,9 +344,13 @@ function viewMes(M){
   </section>`;
 }
 
+function refillCard(M){
+  const prev=sortedKeys().filter(k=>k<S.cur&&!isEmptyMonth(S.months[k])).pop();
+  return isEmptyMonth(M)&&prev?`<section class="card"><h2>Este mes está vacío</h2><p class="hint">Copia tus gastos fijos, inversiones y Livret A de ${label(prev).toLowerCase()}. Lo que ya escribiste se mantiene.</p><button class="btn" style="margin-top:10px" data-act="refill">Copiar de ${label(prev).toLowerCase()}</button></section>`:'';
+}
 function viewFijos(M){
   const c=calc(M);
-  return `
+  return `${refillCard(M)}
   <section class="card">
     <div class="kv"><span>Gastos fijos</span><b class="num">${fmt(c.fijosSolo)}</b></div>
     <div class="kv"><span>Imprevistos</span><b class="num">${fmt(c.imprev)}</b></div>
@@ -398,7 +414,7 @@ function viewPatri(M){
     <input class="amt num" inputmode="decimal" data-arr="inv" data-i="${i}" data-k="monto" data-n="1" value="${vin(x.monto)}" aria-label="Saldo actual">
   </li>`;
   const meta=z(lv.meta),falta=Math.max(0,meta-z(lv.saldo)),w=meta?Math.min(100,z(lv.saldo)/meta*100):0;
-  return `
+  return `${refillCard(M)}
   <section class="card">
     <p class="hint">Patrimonio total</p>
     <div class="big num">${fmt(c.total)}</div>
@@ -495,6 +511,7 @@ view.addEventListener('click',e=>{
   if(a==='start')return startMonth(S.cur);
   if(a==='goto'){S.cur=b.dataset.m;if(S.tab==='hist')S.tab='mes';render();window.scrollTo(0,0);return}
   if(a==='export')return exportData(b.dataset.scope);
+  if(a==='refill'){refill(S.cur);render();setStatus('Copiado ✓');return}
   if(!M)return;
   if(a==='addfijo'||a==='addimp'){
     const p=a==='addfijo'?'nf':'ni';const nom=document.getElementById(p+'-nom').value.trim();const m=num(document.getElementById(p+'-mon').value);
@@ -538,6 +555,7 @@ async function importFiles(list){
   const reemplaza=ks.filter(k=>S.months[k]);
   if(!confirm('Se van a cargar '+ks.length+' mes(es): '+ks.map(label).join(', ')+'.'+(reemplaza.length?'\nSe reemplazarán: '+reemplaza.map(label).join(', ')+'.':'')+'\n¿Continuar?'))return;
   ks.forEach(k=>{S.months[k]=found[k];save(k)});
+  sortedKeys().forEach(k=>{if(isEmptyMonth(S.months[k]))refill(k)});
   S.cur=sortedKeys().pop();S.tab='mes';render();window.scrollTo(0,0);
   setStatus('Copia restaurada ✓ — estás en '+label(S.cur).toLowerCase());
 }
