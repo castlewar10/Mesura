@@ -156,8 +156,9 @@ function calc(M){
   const ingreso=z(M.ingreso);
   const fijosSolo=(M.fijos||[]).reduce((a,f)=>a+z(f.monto),0);
   const imprev=(M.imprevistos||[]).reduce((a,f)=>a+z(f.monto),0);
-  const fijos=fijosSolo+imprev;
-  const tr=(M.fijos||[]).filter(f=>f.tr).reduce((a,f)=>a+z(f.monto),0)+(M.imprevistos||[]).filter(f=>f.tr).reduce((a,f)=>a+z(f.monto),0);
+  const anuMes=(M.anuales||[]).filter(a=>a.toca).reduce((a,f)=>a+z(f.monto),0);
+  const fijos=fijosSolo+imprev+anuMes;
+  const tr=(M.fijos||[]).filter(f=>f.tr).reduce((a,f)=>a+z(f.monto),0)+(M.imprevistos||[]).filter(f=>f.tr).reduce((a,f)=>a+z(f.monto),0)+(M.anuales||[]).filter(f=>f.tr&&f.toca).reduce((a,f)=>a+z(f.monto),0);
   const libre=ingreso-fijos;
   const tot=r.ahorro+r.ocio;
   const pres={ahorro:libre*(r.ahorro/tot),ocio:libre*(r.ocio/tot),ex:z(M.caf)};
@@ -167,7 +168,7 @@ function calc(M){
   const fis=inv.filter(i=>i.tipo==='fisico').reduce((a,i)=>a+z(i.monto),0);
   const aportes=inv.reduce((a,i)=>a+z(i.aporte)/(i.cadaMeses||1),0);
   const lv=M.livret||{};
-  return{r,ingreso,fijosSolo,imprev,fijos,tr,libre,pres,pct,fin,fis,aportes,livret:z(lv.saldo),total:fin+fis+z(lv.saldo),coaching:z(M.coaching)+z(M.coachOtro),asptt:z(M.coaching),otro:z(M.coachOtro)};
+  return{r,ingreso,fijosSolo,imprev,anuMes,fijos,tr,libre,pres,pct,fin,fis,aportes,livret:z(lv.saldo),total:fin+fis+z(lv.saldo),coaching:z(M.coaching)+z(M.coachOtro),asptt:z(M.coaching),otro:z(M.coachOtro)};
 }
 /* coaching: temporada sept→ago y año civil */
 const COACH={tasa:28,proyeccion:2325};
@@ -234,7 +235,7 @@ function startMonth(m){
     mes:m,ingreso:null,caf:P?P.caf:null,
     reglas:P?{...P.reglas}:{fijos:60,ahorro:25,ocio:15},
     fijos:P?P.fijos.map(f=>({...f,pagado:false})):[],
-    anuales:P?(P.anuales||[]).map(a=>({...a})):[],
+    anuales:P?(P.anuales||[]).map(a=>({...a,toca:false})):[],
     imprevistos:[],coaching:null,coachOtro:null,coach:P&&P.coach?{...P.coach}:{...COACH},
     inv:P?P.inv.map(i=>({...i,revisado:false})):[],
     livret:P?{...P.livret}:{saldo:null,meta:null,tasa:null}
@@ -247,7 +248,7 @@ function refill(m){
   const M=S.months[m];const prev=sortedKeys().filter(k=>k<m&&!isEmptyMonth(S.months[k])).pop();
   if(!M||!prev)return false;const P=S.months[prev];
   if(!(M.fijos||[]).length)M.fijos=P.fijos.map(f=>({...f,pagado:false}));
-  if(!(M.anuales||[]).length)M.anuales=(P.anuales||[]).map(a=>({...a}));
+  if(!(M.anuales||[]).length)M.anuales=(P.anuales||[]).map(a=>({...a,toca:false}));
   if(!(M.inv||[]).length)M.inv=P.inv.map(i=>({...i,revisado:false}));
   if(!M.livret||M.livret.saldo==null)M.livret={...P.livret};
   if(M.caf==null)M.caf=P.caf;
@@ -305,9 +306,9 @@ function viewMes(M){
       <label class="field"><span>Ingreso Bottega (€)</span><input class="num" inputmode="decimal" data-f="ingreso" value="${vin(M.ingreso)}" placeholder="0,00"></label>
       <label class="field"><span>Ayuda CAF (€)</span><input class="num" inputmode="decimal" data-f="caf" value="${vin(M.caf)}" placeholder="0,00"></label>
     </div>
-    <p class="hint">Dinero libre tras gastos fijos${c.imprev?' e imprevistos':''}</p>
+    <p class="hint">Dinero libre tras los gastos del mes</p>
     <div class="big num ${c.libre<0?'bad':''}">${fmt(c.libre)}</div>
-    <p class="hint num">Gastos del mes ${fmt(c.fijos)} = <b class="${c.pct<=c.r.fijos?'good':'bad'}">${c.pct.toFixed(1).replace('.',',')} %</b> del ingreso (meta ≤ ${c.r.fijos} %)${c.imprev?`<br>Incluye ${fmt(c.imprev)} de imprevistos`:''}</p>
+    <p class="hint num">Gastos del mes ${fmt(c.fijos)} = <b class="${c.pct<=c.r.fijos?'good':'bad'}">${c.pct.toFixed(1).replace('.',',')} %</b> del ingreso (meta ≤ ${c.r.fijos} %)${c.imprev?`<br>Incluye ${fmt(c.imprev)} de imprevistos`:''}${c.anuMes?`<br>Incluye ${fmt(c.anuMes)} de pagos trimestrales/anuales`:''}</p>
   </section>
   <section class="card">
     <h2>Tus sobres de ${label(S.cur).toLowerCase().split(' ')[0]}</h2>
@@ -354,6 +355,7 @@ function viewFijos(M){
   <section class="card">
     <div class="kv"><span>Gastos fijos</span><b class="num">${fmt(c.fijosSolo)}</b></div>
     <div class="kv"><span>Imprevistos</span><b class="num">${fmt(c.imprev)}</b></div>
+    ${c.anuMes?`<div class="kv"><span>Pagos trimestrales/anuales</span><b class="num">${fmt(c.anuMes)}</b></div>`:''}
     <div class="kv"><span>Total del mes</span><b class="num">${fmt(c.fijos)}</b></div>
     <div class="kv"><span>Enviar a Cuenta Madre TR</span><b class="num">${fmt(c.tr)}</b></div>
     <div class="kv"><span>Pagados</span><b class="num">${M.fijos.filter(f=>f.pagado).length} de ${M.fijos.length}</b></div>
@@ -393,14 +395,14 @@ function viewFijos(M){
     <p class="hint">Solo cuenta este mes: se resta del dinero libre y no se copia al mes siguiente.</p>
   </section>
   <section class="card">
-    <details><summary>Pagos anuales o trimestrales (${(M.anuales||[]).length})</summary>
-      <p class="hint">No cuentan en el total mensual hasta que renueven. Úsalo como recordatorio.</p>
-      <ul class="list">${(M.anuales||[]).map((a,i)=>`<li>
-        <span></span>
-        <span><span class="name">${esc(a.nombre)}</span><div class="sub">${esc(a.frecuencia||'')}${a.nota?' · '+esc(a.nota):''}</div></span>
-        <input class="amt num" inputmode="decimal" data-arr="anuales" data-i="${i}" data-k="monto" data-n="1" value="${vin(a.monto)}" aria-label="Monto">
-      </li>`).join('')}</ul>
-    </details>
+    <h2>Pagos anuales o trimestrales</h2>
+    <p class="hint">Marca ✓ el mes en que te toca pagar: se suma al total de este mes. El mes siguiente vuelve a estar desmarcado.</p>
+    <ul class="list">${(M.anuales||[]).map((a,i)=>`<li>
+      <input type="checkbox" class="chk" aria-label="Toca este mes" data-arr="anuales" data-i="${i}" data-k="toca" ${a.toca?'checked':''}>
+      <span><span class="name">${esc(a.nombre)}</span><div class="sub">${esc(a.frecuencia||'')}${a.nota?' · '+esc(a.nota):''}</div>
+        <button class="tr ${a.tr?'on':''}" data-act="tr" data-arr="anuales" data-i="${i}">TR</button></span>
+      <input class="amt num" inputmode="decimal" data-arr="anuales" data-i="${i}" data-k="monto" data-n="1" value="${vin(a.monto)}" aria-label="Monto">
+    </li>`).join('')}</ul>
   </section>`;
 }
 
